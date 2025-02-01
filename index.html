@@ -3,21 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyScript Example</title>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <title>Chatbot Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #chat {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            background-color: #f9f9f9;
+        }
+        #userInput {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello from PyScript!</h1>
-    <p id="output"></p>
-    
-    <py-script>
-        def greet():
-            return "Welcome to the PyScript webpage!"
+    <h1>Chatbot Example</h1>
+    <div id="chat"></div>
+    <div id="userInput">
+        <input type="text" id="message" placeholder="Type your message here..." />
+        <button id="sendMessage">Send</button>
+    </div>
 
-        output_element = Element("output")
-        output_element.write(greet())
-    </py-script>
+    <script>
+        document.getElementById('sendMessage').addEventListener('click', function() {
+            const userMessage = document.getElementById('message').value;
+            const chatDiv = document.getElementById('chat');
+            chatDiv.innerHTML += `<p><strong>You:</strong> ${userMessage}</p>`;
+            document.getElementById('message').value = '';
+
+            const url = 'https://api.blackbox.ai/api/chat';
+            const data = {
+                messages: [
+                    {
+                        content: userMessage,
+                        role: 'user'
+                    }
+                ],
+                model: 'deepseek-ai/DeepSeek-V3',
+                max_tokens: '1024'
+            };
+
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            axios.post(url, data, config)
+                .then(response => {
+                    const botMessage = response.data.choices[0].message.content; // Adjust based on actual response structure
+                    chatDiv.innerHTML += `<p><strong>Bot:</strong> ${botMessage}</p>`;
+                    chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to the bottom
+                })
+                .catch(error => {
+                    chatDiv.innerHTML += `<p><strong>Error:</strong> ${error}</p>`;
+                });
+        });
+    </script>
 </body>
 </html>
-
